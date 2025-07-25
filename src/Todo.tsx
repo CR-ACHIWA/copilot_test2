@@ -24,6 +24,7 @@ const TodoApp: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<TodoStatus>('TODO');
+  const [draggedTodo, setDraggedTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     fetch('/members.json')
@@ -68,8 +69,37 @@ const TodoApp: React.FC = () => {
   const getMemberNames = (memberIds: number[]) => 
     memberIds.map(id => members.find(m => m.id === id)?.name).filter(Boolean).join(', ');
 
+  // ドラッグ&ドロップ関連の関数
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, todo: Todo) => {
+    setDraggedTodo(todo);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, newStatus: TodoStatus) => {
+    e.preventDefault();
+    if (draggedTodo && draggedTodo.status !== newStatus) {
+      moveTodo(draggedTodo.id, newStatus);
+    }
+    setDraggedTodo(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTodo(null);
+  };
+
   return (
-    <div style={{ maxWidth: 1200, margin: '2rem auto', padding: 20 }}>
+    <div style={{ 
+      maxWidth: 1200, 
+      margin: '0 auto', 
+      padding: 20,
+      width: '100%',
+      boxSizing: 'border-box'
+    }}>
       <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>カンバンボード</h2>
       
       {/* Todo追加フォーム */}
@@ -153,12 +183,17 @@ const TodoApp: React.FC = () => {
         minHeight: 400
       }}>
         {(['TODO', 'PROGRESS', 'DONE'] as TodoStatus[]).map(status => (
-          <div key={status} style={{ 
-            backgroundColor: '#f8f9fa',
-            borderRadius: 8,
-            padding: 16,
-            border: '2px solid #dee2e6'
-          }}>
+          <div 
+            key={status} 
+            style={{ 
+              backgroundColor: '#f8f9fa',
+              borderRadius: 8,
+              padding: 16,
+              border: '2px solid #dee2e6'
+            }}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, status)}
+          >
             <h3 style={{ 
               textAlign: 'center', 
               margin: '0 0 16px 0',
@@ -173,14 +208,24 @@ const TodoApp: React.FC = () => {
             </h3>
             
             {getTodosByStatus(status).map(todo => (
-              <div key={todo.id} style={{ 
-                backgroundColor: 'white',
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                padding: 12,
-                marginBottom: 8,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-              }}>
+              <div 
+                key={todo.id} 
+                draggable
+                onDragStart={(e) => handleDragStart(e, todo)}
+                onDragEnd={handleDragEnd}
+                style={{ 
+                  backgroundColor: 'white',
+                  border: '1px solid #ddd',
+                  borderRadius: 4,
+                  padding: 12,
+                  marginBottom: 8,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  cursor: 'move',
+                  opacity: draggedTodo?.id === todo.id ? 0.5 : 1,
+                  transform: draggedTodo?.id === todo.id ? 'rotate(5deg)' : 'none',
+                  transition: 'opacity 0.2s, transform 0.2s'
+                }}
+              >
                 <div style={{ marginBottom: 8, fontWeight: 'bold' }}>
                   {todo.text}
                 </div>
@@ -222,9 +267,15 @@ const TodoApp: React.FC = () => {
                 textAlign: 'center', 
                 color: '#999', 
                 fontStyle: 'italic',
-                padding: 20
+                padding: 20,
+                border: '2px dashed #ddd',
+                borderRadius: 4,
+                backgroundColor: '#fafafa'
               }}>
-                タスクがありません
+                {draggedTodo && draggedTodo.status !== status 
+                  ? 'ここにドロップ' 
+                  : 'タスクがありません'
+                }
               </div>
             )}
           </div>
