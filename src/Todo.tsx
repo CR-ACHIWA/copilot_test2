@@ -95,8 +95,8 @@ const TodoApp: React.FC = () => {
   return (
     <div style={{ 
       maxWidth: 1200, 
-      margin: '0 auto', 
-      padding: 20,
+      margin: '20px auto', 
+      padding: '0 20px',
       width: '100%',
       boxSizing: 'border-box'
     }}>
@@ -180,7 +180,8 @@ const TodoApp: React.FC = () => {
         display: 'grid', 
         gridTemplateColumns: 'repeat(3, 1fr)', 
         gap: 20,
-        minHeight: 400
+        minHeight: 400,
+        alignItems: 'start'
       }}>
         {(['TODO', 'PROGRESS', 'DONE'] as TodoStatus[]).map(status => (
           <div 
@@ -223,7 +224,11 @@ const TodoApp: React.FC = () => {
                   cursor: 'move',
                   opacity: draggedTodo?.id === todo.id ? 0.5 : 1,
                   transform: draggedTodo?.id === todo.id ? 'rotate(5deg)' : 'none',
-                  transition: 'opacity 0.2s, transform 0.2s'
+                  transition: 'opacity 0.2s, transform 0.2s',
+                  minHeight: '80px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
                 }}
               >
                 <div style={{ marginBottom: 8, fontWeight: 'bold' }}>
