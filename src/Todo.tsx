@@ -190,7 +190,10 @@ const TodoApp: React.FC = () => {
               backgroundColor: '#f8f9fa',
               borderRadius: 8,
               padding: 16,
-              border: '2px solid #dee2e6'
+              border: '2px solid #dee2e6',
+              minHeight: '300px',
+              display: 'flex',
+              flexDirection: 'column'
             }}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
@@ -203,86 +206,119 @@ const TodoApp: React.FC = () => {
                               status === 'PROGRESS' ? '#fff3e0' : '#e8f5e8',
               borderRadius: 4,
               color: status === 'TODO' ? '#1976d2' : 
-                     status === 'PROGRESS' ? '#f57c00' : '#388e3c'
+                     status === 'PROGRESS' ? '#f57c00' : '#388e3c',
+              flexShrink: 0
             }}>
               {status} ({getTodosByStatus(status).length})
             </h3>
             
-            {getTodosByStatus(status).map(todo => (
-              <div 
-                key={todo.id} 
-                draggable
-                onDragStart={(e) => handleDragStart(e, todo)}
-                onDragEnd={handleDragEnd}
-                style={{ 
-                  backgroundColor: 'white',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  padding: 12,
-                  marginBottom: 8,
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  cursor: 'move',
-                  opacity: draggedTodo?.id === todo.id ? 0.5 : 1,
-                  transform: draggedTodo?.id === todo.id ? 'rotate(5deg)' : 'none',
-                  transition: 'opacity 0.2s, transform 0.2s',
-                  minHeight: '80px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <div style={{ marginBottom: 8, fontWeight: 'bold' }}>
-                  {todo.text}
+            <div style={{ 
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '200px'
+            }}>
+              {getTodosByStatus(status).map(todo => (
+                <div 
+                  key={todo.id} 
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, todo)}
+                  onDragEnd={handleDragEnd}
+                  style={{ 
+                    backgroundColor: 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: 4,
+                    padding: 12,
+                    marginBottom: 8,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    cursor: 'move',
+                    opacity: draggedTodo?.id === todo.id ? 0.5 : 1,
+                    transform: draggedTodo?.id === todo.id ? 'rotate(5deg)' : 'none',
+                    transition: 'opacity 0.2s, transform 0.2s',
+                    minHeight: '80px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    flexShrink: 0
+                  }}
+                >
+                  <div style={{ marginBottom: 8, fontWeight: 'bold' }}>
+                    {todo.text}
+                  </div>
+                  <div style={{ 
+                    fontSize: '0.85em', 
+                    color: '#666',
+                    marginBottom: 8 
+                  }}>
+                    担当: {getMemberNames(todo.memberIds)}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {(['TODO', 'PROGRESS', 'DONE'] as TodoStatus[])
+                      .filter(s => s !== todo.status)
+                      .map(newStatus => (
+                        <button
+                          key={newStatus}
+                          onClick={() => moveTodo(todo.id, newStatus)}
+                          style={{
+                            fontSize: '0.75em',
+                            padding: '4px 8px',
+                            backgroundColor: newStatus === 'TODO' ? '#2196f3' : 
+                                           newStatus === 'PROGRESS' ? '#ff9800' : '#4caf50',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 3,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          → {newStatus}
+                        </button>
+                      ))}
+                  </div>
                 </div>
+              ))}
+              
+              {getTodosByStatus(status).length === 0 && (
                 <div style={{ 
-                  fontSize: '0.85em', 
-                  color: '#666',
-                  marginBottom: 8 
+                  textAlign: 'center', 
+                  color: '#999', 
+                  fontStyle: 'italic',
+                  padding: 20,
+                  border: '2px dashed #ddd',
+                  borderRadius: 4,
+                  backgroundColor: '#fafafa',
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '150px'
                 }}>
-                  担当: {getMemberNames(todo.memberIds)}
+                  {draggedTodo && draggedTodo.status !== status 
+                    ? 'ここにドロップ' 
+                    : 'タスクがありません'
+                  }
                 </div>
-                
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                  {(['TODO', 'PROGRESS', 'DONE'] as TodoStatus[])
-                    .filter(s => s !== todo.status)
-                    .map(newStatus => (
-                      <button
-                        key={newStatus}
-                        onClick={() => moveTodo(todo.id, newStatus)}
-                        style={{
-                          fontSize: '0.75em',
-                          padding: '4px 8px',
-                          backgroundColor: newStatus === 'TODO' ? '#2196f3' : 
-                                         newStatus === 'PROGRESS' ? '#ff9800' : '#4caf50',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: 3,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        → {newStatus}
-                      </button>
-                    ))}
+              )}
+              
+              {getTodosByStatus(status).length > 0 && (
+                <div style={{ 
+                  flex: 1,
+                  minHeight: '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ccc',
+                  fontSize: '0.9em',
+                  fontStyle: 'italic',
+                  border: draggedTodo && draggedTodo.status !== status ? '2px dashed #007bff' : 'none',
+                  borderRadius: 4,
+                  backgroundColor: draggedTodo && draggedTodo.status !== status ? '#f0f8ff' : 'transparent',
+                  transition: 'all 0.2s ease'
+                }}>
+                  {draggedTodo && draggedTodo.status !== status && 'ここにドロップ'}
                 </div>
-              </div>
-            ))}
-            
-            {getTodosByStatus(status).length === 0 && (
-              <div style={{ 
-                textAlign: 'center', 
-                color: '#999', 
-                fontStyle: 'italic',
-                padding: 20,
-                border: '2px dashed #ddd',
-                borderRadius: 4,
-                backgroundColor: '#fafafa'
-              }}>
-                {draggedTodo && draggedTodo.status !== status 
-                  ? 'ここにドロップ' 
-                  : 'タスクがありません'
-                }
-              </div>
-            )}
+              )}
+            </div>
           </div>
         ))}
       </div>
