@@ -1,6 +1,6 @@
 
 /**
- * Todoアプリのエントリポイント（カンバンボード対応）
+ * Todoアプリのエントリポイント
  * @author CR-ACHIWA
  */
 import React from 'react';
