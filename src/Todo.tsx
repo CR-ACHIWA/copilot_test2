@@ -33,7 +33,7 @@ const TodoApp: React.FC = () => {
         setMembers(data);
       });
   }, []);
-
+  
   const addTodo = () => {
     if (!text.trim() || selectedMembers.length === 0) return;
     setTodos([
@@ -91,24 +91,12 @@ const TodoApp: React.FC = () => {
   const handleDragEnd = () => {
     setDraggedTodo(null);
   };
-
   return (
-    <div style={{ 
-      maxWidth: 1200, 
-      margin: '20px auto', 
-      padding: '0 20px',
-      width: '100%',
-      boxSizing: 'border-box'
-    }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>カンバンボード</h2>
-      
+    <div className="kanban-root">
+      <h2 className="kanban-title">カンバンボード</h2>
+
       {/* Todo追加フォーム */}
-      <div style={{ 
-        backgroundColor: '#f5f5f5', 
-        padding: 20, 
-        borderRadius: 8, 
-        marginBottom: 20 
-      }}>
+      <div className="kanban-form">
         <h3>新しいタスクを追加</h3>
         <div style={{ marginBottom: 16 }}>
           <input
@@ -116,24 +104,19 @@ const TodoApp: React.FC = () => {
             value={text}
             onChange={e => setText(e.target.value)}
             placeholder="やることを入力"
-            style={{ 
-              width: '100%', 
-              padding: 8, 
-              marginBottom: 8,
-              borderRadius: 4,
-              border: '1px solid #ccc'
-            }}
+            className="kanban-input"
           />
         </div>
-        
-        <div style={{ marginBottom: 16 }}>
+
+        <div style={{ marginBottom: 16, textAlign: 'left' }}>
           <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>
             ステータス:
           </label>
-          <select 
-            value={selectedStatus} 
+          <select
+            value={selectedStatus}
             onChange={e => setSelectedStatus(e.target.value as TodoStatus)}
-            style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+            className="kanban-status-select"
+            style={{ textAlign: 'left' }}
           >
             <option value="TODO">TODO</option>
             <option value="PROGRESS">PROGRESS</option>
@@ -141,135 +124,72 @@ const TodoApp: React.FC = () => {
           </select>
         </div>
 
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>
+        <div style={{ marginBottom: 16, textAlign: 'left' }}>
+          <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold', textAlign: 'left' }}>
             担当者（複数選択可）:
           </label>
-          {members.map(member => (
-            <label key={member.id} style={{ display: 'block', marginBottom: 4 }}>
-              <input
-                type="checkbox"
-                checked={selectedMembers.includes(member.id)}
-                onChange={() => toggleMemberSelection(member.id)}
-                style={{ marginRight: 8 }}
-              />
-              {member.name}
-            </label>
-          ))}
+          <div>
+            {members.map(member => (
+              <label key={member.id} className="kanban-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={selectedMembers.includes(member.id)}
+                  onChange={() => toggleMemberSelection(member.id)}
+                />
+                {member.name}
+              </label>
+            ))}
+          </div>
         </div>
 
-        <button 
-          onClick={addTodo}
-          disabled={!text.trim() || selectedMembers.length === 0}
-          style={{ 
-            padding: '8px 16px', 
-            backgroundColor: '#007bff', 
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: selectedMembers.length > 0 && text.trim() ? 'pointer' : 'not-allowed',
-            opacity: selectedMembers.length > 0 && text.trim() ? 1 : 0.6
-          }}
-        >
-          追加
-        </button>
+        <div className="kanban-btn-row">
+          <button
+            onClick={addTodo}
+            disabled={!text.trim() || selectedMembers.length === 0}
+            className="kanban-add-btn"
+          >
+            追加
+          </button>
+        </div>
       </div>
 
       {/* カンバンボード */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(3, 1fr)', 
-        gap: 20,
-        minHeight: 400,
-        alignItems: 'start'
-      }}>
+      <div className="kanban-board">
         {(['TODO', 'PROGRESS', 'DONE'] as TodoStatus[]).map(status => (
-          <div 
-            key={status} 
-            style={{ 
-              backgroundColor: '#f8f9fa',
-              borderRadius: 8,
-              padding: 16,
-              border: '2px solid #dee2e6',
-              minHeight: '300px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
+          <div
+            key={status}
+            className="kanban-column"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
           >
-            <h3 style={{ 
-              textAlign: 'center', 
-              margin: '0 0 16px 0',
-              padding: '8px 0',
-              backgroundColor: status === 'TODO' ? '#e3f2fd' : 
-                              status === 'PROGRESS' ? '#fff3e0' : '#e8f5e8',
-              borderRadius: 4,
-              color: status === 'TODO' ? '#1976d2' : 
-                     status === 'PROGRESS' ? '#f57c00' : '#388e3c',
-              flexShrink: 0
-            }}>
+            <h3 className={`kanban-column-title ${status.toLowerCase()}`}>
               {status} ({getTodosByStatus(status).length})
             </h3>
-            
-            <div style={{ 
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: '200px'
-            }}>
+
+            <div className="kanban-tasks">
               {getTodosByStatus(status).map(todo => (
-                <div 
-                  key={todo.id} 
+                <div
+                  key={todo.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, todo)}
                   onDragEnd={handleDragEnd}
-                  style={{ 
-                    backgroundColor: 'white',
-                    border: '1px solid #ddd',
-                    borderRadius: 4,
-                    padding: 12,
-                    marginBottom: 8,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    cursor: 'move',
-                    opacity: draggedTodo?.id === todo.id ? 0.5 : 1,
-                    transform: draggedTodo?.id === todo.id ? 'rotate(5deg)' : 'none',
-                    transition: 'opacity 0.2s, transform 0.2s',
-                    minHeight: '80px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    flexShrink: 0
-                  }}
+                  className={`kanban-task${draggedTodo?.id === todo.id ? ' dragging' : ''}`}
                 >
-                  <div style={{ marginBottom: 8, fontWeight: 'bold' }}>
+                  <div className="kanban-task-title">
                     {todo.text}
                   </div>
-                  <div style={{ 
-                    fontSize: '0.85em', 
-                    color: '#666',
-                    marginBottom: 8 
-                  }}>
+                  <div className="kanban-task-members">
                     担当: {getMemberNames(todo.memberIds)}
                   </div>
-                  
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+
+                  <div className="kanban-task-btns">
                     {(['TODO', 'PROGRESS', 'DONE'] as TodoStatus[])
                       .filter(s => s !== todo.status)
                       .map(newStatus => (
                         <button
                           key={newStatus}
                           onClick={() => moveTodo(todo.id, newStatus)}
-                          style={{
-                            fontSize: '0.75em',
-                            padding: '4px 8px',
-                            backgroundColor: newStatus === 'TODO' ? '#2196f3' : 
-                                           newStatus === 'PROGRESS' ? '#ff9800' : '#4caf50',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: 3,
-                            cursor: 'pointer'
-                          }}
+                          className={`kanban-move-btn ${newStatus.toLowerCase()}`}
                         >
                           → {newStatus}
                         </button>
@@ -277,44 +197,18 @@ const TodoApp: React.FC = () => {
                   </div>
                 </div>
               ))}
-              
+
               {getTodosByStatus(status).length === 0 && (
-                <div style={{ 
-                  textAlign: 'center', 
-                  color: '#999', 
-                  fontStyle: 'italic',
-                  padding: 20,
-                  border: '2px dashed #ddd',
-                  borderRadius: 4,
-                  backgroundColor: '#fafafa',
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '150px'
-                }}>
-                  {draggedTodo && draggedTodo.status !== status 
-                    ? 'ここにドロップ' 
+                <div className="kanban-empty">
+                  {draggedTodo && draggedTodo.status !== status
+                    ? 'ここにドロップ'
                     : 'タスクがありません'
                   }
                 </div>
               )}
-              
+
               {getTodosByStatus(status).length > 0 && (
-                <div style={{ 
-                  flex: 1,
-                  minHeight: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ccc',
-                  fontSize: '0.9em',
-                  fontStyle: 'italic',
-                  border: draggedTodo && draggedTodo.status !== status ? '2px dashed #007bff' : 'none',
-                  borderRadius: 4,
-                  backgroundColor: draggedTodo && draggedTodo.status !== status ? '#f0f8ff' : 'transparent',
-                  transition: 'all 0.2s ease'
-                }}>
+                <div className={`kanban-drop-area${draggedTodo && draggedTodo.status !== status ? ' active' : ''}`}>
                   {draggedTodo && draggedTodo.status !== status && 'ここにドロップ'}
                 </div>
               )}
@@ -324,6 +218,9 @@ const TodoApp: React.FC = () => {
       </div>
     </div>
   );
+// ...existing code...
+// JSXの末尾に重複したstyle付きのコードが残っていたため、すべて削除
+// ...existing code...
 };
 
 export default TodoApp;
