@@ -284,12 +284,12 @@ describe('システムリソース境界テスト', () => {
     const endTime = Date.now()
     const duration = endTime - startTime
 
-    // 20個のTodo追加が30秒以内に完了することを確認
-    expect(duration).toBeLessThan(30000)
+    // 20個のTodo追加が15秒以内に完了することを確認
+    expect(duration).toBeLessThan(15000)
 
     // 件数が正しく表示される
     expect(screen.getByText(/TODO \(20\)/)).toBeInTheDocument()
-  }, 35000)
+  }, 20000)
 
   it('境界値: 大量の担当者データでも正常に動作する', async () => {
     const manyMembers = Array.from({ length: 100 }, (_, i) => ({

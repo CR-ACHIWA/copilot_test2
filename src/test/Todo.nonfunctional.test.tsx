@@ -230,13 +230,13 @@ describe('パフォーマンステスト', () => {
 
     await waitFor(() => {
       expect(screen.getByText('山田 太郎')).toBeInTheDocument()
-    }, { timeout: 3000 }) // 3秒以内に読み込まれることを期待
+    }, { timeout: 2000 }) // 2秒以内に読み込まれることを期待
 
     const endTime = Date.now()
     const loadTime = endTime - startTime
 
-    // 3秒以内に読み込まれることを確認
-    expect(loadTime).toBeLessThan(3000)
+    // 2秒以内に読み込まれることを確認
+    expect(loadTime).toBeLessThan(2000)
   })
 
   it('正常系: 大量のTodoを追加しても動作する', async () => {
